@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from market.models import Category, Product
+from market.models import Category, Product, Order
 
 
 @admin.register(Category)
@@ -11,5 +11,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'price')
+    list_display = ('id', 'name', 'price', 'category')
+    list_filter = ('category',)
     list_display_links = ('id', 'name')
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'created', 'total_order_price')
+    list_display_links = ('id', 'user')

@@ -1,5 +1,9 @@
 from django.db import models
 
+from eco_market.settings import AUTH_USER_MODEL
+
+User = AUTH_USER_MODEL
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -10,6 +14,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=0)
@@ -17,6 +22,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=13)
     address = models.CharField(max_length=100)
     reference_point = models.CharField(max_length=200)
