@@ -4,7 +4,6 @@ from eco_market.settings import AUTH_USER_MODEL
 
 User = AUTH_USER_MODEL
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     photo = models.ImageField(upload_to='category_photos/')
