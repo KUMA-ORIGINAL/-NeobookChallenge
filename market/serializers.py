@@ -36,4 +36,18 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
+<<<<<<< HEAD
         fields = ('id', 'phone_number', 'address', 'reference_point', 'comment', 'products')
+=======
+        fields = '__all__'
+
+    # def create(self, validated_data):
+    #     products_data = validated_data.pop('products')
+    #     order = Order.objects.create(**validated_data)
+    #     for product_data in products_data:
+    #         OrderItem.objects.create(order=order, **product_data)
+    #     return {
+    #         'id': order.id,
+    #         'created': order.created
+    #     }
+>>>>>>> f8af4f240bb984350b7a4389cbe416ffca479358

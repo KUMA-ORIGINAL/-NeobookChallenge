@@ -4,7 +4,6 @@ from eco_market.settings import AUTH_USER_MODEL
 
 User = AUTH_USER_MODEL
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     photo = models.ImageField(upload_to='category_photos/')
@@ -17,6 +16,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField()
+    quantity = models.DecimalField(max_digits=10, decimal_places=0)
     price = models.DecimalField(max_digits=10, decimal_places=0)
     photo = models.ImageField(upload_to='product_photos/')
 
