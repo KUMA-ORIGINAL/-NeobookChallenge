@@ -31,6 +31,13 @@ class Order(models.Model):
     products = models.ManyToManyField(Product, through='OrderItem')
     total_order_price = models.DecimalField(max_digits=10, decimal_places=0)
 
+    def save(self, *args, **kwargs):
+        total_order_price = 0
+        for product in self.products.all():
+            total_order_price += product.total_price
+        self.total_order_price = total_order_price
+        super().save(*args, *kwargs)
+
     class Meta:
         ordering = ['-created']
 
@@ -39,8 +46,3 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    total_price = models.DecimalField(max_digits=10, decimal_places=0)
-
-    def save(self, *args, **kwargs):
-        self.total_price = self.product.price * self.quantity
-        super().save(*args, **kwargs)
