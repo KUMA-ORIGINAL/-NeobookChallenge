@@ -29,14 +29,14 @@ class Order(models.Model):
     comment = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add=True)
     products = models.ManyToManyField(Product, through='OrderItem')
-    total_order_price = models.DecimalField(max_digits=10, decimal_places=0)
+    total_order_price = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
 
-    def save(self, *args, **kwargs):
-        total_order_price = 0
-        for product in self.products.all():
-            total_order_price += product.total_price
-        self.total_order_price = total_order_price
-        super().save(*args, *kwargs)
+    # def save(self, *args, **kwargs):
+    #     total_order_price = 0
+    #     for product in self.products.all():
+    #         total_order_price += product.total_price
+    #     self.total_order_price = total_order_price
+    #     super().save(*args, *kwargs)
 
     class Meta:
         ordering = ['-created']

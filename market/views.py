@@ -26,12 +26,30 @@ class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    # def perform_create(self, serializer):
+    #     serializer.save(user=self.request.user)
+
     def perform_create(self, serializer):
-        products = self.request.data.get('products')
-        order = serializer.save(user=self.request.user)
-        for product in products:
-            order_item = OrderItem.objects.create(order=order, **product)
-            order.products.add(order_item)
+        # Получаем данные о продуктах из запроса
+        products_data = self.request.data.get('products', [])
+
+        # Создаем заказ и связанные с ним OrderItem в цикле для каждого продукта
+        order = serializer.save(user=self.request.user)  # Сохраняем заказ и привязываем к пользователю
+
+        for product_data in products_data:
+            product_id = product_data.get('id')  # Получаем ID продукта из данных запроса
+            quantity = product_data.get('quantity', 1)  # Получаем количество продукта
+
+            # Получаем экземпляр Product по его ID
+            product = Product.objects.get(pk=product_id)
+
+            # Создаем OrderItem для данного заказа и продукта
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity
+            )
+            order.products.add(product)
 
 
 class UserOrderListView(generics.RetrieveAPIView):
