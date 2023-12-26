@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from market.models import Category, Product, OrderItem, Order
+from market.models import Category, Product, Order, Cart
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,15 +24,34 @@ class ProductFullSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
+# class OrderItemSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = OrderItem
+#         fields = ('quantity', 'product')
+
+
+class CartSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
 
     class Meta:
-        model = OrderItem
-        fields = ('quantity', 'product')
+        model = Cart
+        fields = ['id', 'product', 'quantity']
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        product = validated_data['product']
+        quantity = validated_data['quantity']
+        cart, created = Cart.objects.get_or_create(user=user, product=product, defaults={'quantity': quantity})
+        if not created:
+            cart.quantity += quantity
+            cart.save()
+        return cart
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderItemSerializer(many=True)
+    products = serializers.PrimaryKeyRelatedField(many=True, queryset=Product.objects.all())
 
     class Meta:
         model = Order
@@ -42,15 +61,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         products_data = validated_data.pop('products', [])  # Получаем данные о продуктах
         order = Order.objects.create(**validated_data)  # Создаем заказ
-
-        # Для каждого продукта создаем OrderItem и связываем его с заказом
         for product_data in products_data:
-            # Получаем данные о продукте
-            product_id = product_data.get('product')
-            quantity = product_data.get('quantity')
-            # Получаем экземпляр Product по его ID
-            product = Product.objects.get(pk=product_id)
-
-            # Создаем OrderItem для данного заказа и продукта
-            order_item = OrderItem.objects.create(order=order, product=product, quantity=quantity)
+            order.products.add(product_data)
         return order

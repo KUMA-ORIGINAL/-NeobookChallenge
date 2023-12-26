@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from market.models import Category, Product, Order, OrderItem
-from market.serializers import CategorySerializer, ProductSerializer, ProductFullSerializer, OrderSerializer
+from market.models import Category, Product, Order, Cart
+from market.serializers import CategorySerializer, ProductSerializer, ProductFullSerializer, OrderSerializer, \
+    CartSerializer
 
 
 class CategoryListView(generics.ListAPIView):
@@ -30,26 +32,21 @@ class OrderCreateView(generics.CreateAPIView):
     #     serializer.save(user=self.request.user)
 
     def perform_create(self, serializer):
-        # Получаем данные о продуктах из запроса
-        products_data = self.request.data.get('products', [])
+        user_cart = Cart.objects.filter(user=self.request.user)
+        products = [cart.product for cart in user_cart]
+        serializer.save(user=self.request.user, products=products)
+        user_cart.delete()
 
-        # Создаем заказ и связанные с ним OrderItem в цикле для каждого продукта
-        order = serializer.save(user=self.request.user)  # Сохраняем заказ и привязываем к пользователю
 
-        for product_data in products_data:
-            product_id = product_data.get('id')  # Получаем ID продукта из данных запроса
-            quantity = product_data.get('quantity', 1)  # Получаем количество продукта
+class CartAddAPIView(generics.CreateAPIView):
+    serializer_class = CartSerializer
+    permission_classes = (IsAuthenticated,)
 
-            # Получаем экземпляр Product по его ID
-            product = Product.objects.get(pk=product_id)
-
-            # Создаем OrderItem для данного заказа и продукта
-            order_item = OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=quantity
-            )
-            order.products.add(product)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cart = serializer.save()
+        return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
 
 
 class UserOrderListView(generics.RetrieveAPIView):

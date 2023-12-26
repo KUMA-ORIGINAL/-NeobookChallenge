@@ -4,6 +4,7 @@ from eco_market.settings import AUTH_USER_MODEL
 
 User = AUTH_USER_MODEL
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     photo = models.ImageField(upload_to='category_photos/')
@@ -28,7 +29,7 @@ class Order(models.Model):
     reference_point = models.CharField(max_length=200)
     comment = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add=True)
-    products = models.ManyToManyField(Product, through='OrderItem')
+    products = models.ManyToManyField(Product)
     total_order_price = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
 
     # def save(self, *args, **kwargs):
@@ -40,6 +41,15 @@ class Order(models.Model):
 
     class Meta:
         ordering = ['-created']
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        unique_together = ('user', 'product')
 
 
 class OrderItem(models.Model):
