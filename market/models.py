@@ -29,7 +29,7 @@ class Order(models.Model):
     reference_point = models.CharField(max_length=200)
     comment = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add=True)
-    products = models.ManyToManyField(Product)
+    products = models.ManyToManyField('Cart')
     total_order_price = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
 
     # def save(self, *args, **kwargs):
@@ -56,3 +56,9 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+
+#
+# for i range(100):
+# a = 5
+# for i in range(0, 10, 2):
+#     print(i)
